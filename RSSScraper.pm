@@ -111,7 +111,7 @@ sub main {
 	my $ua =RSSScraper->new;
 	my $link = $ua->get_rss_link('http://www.redblue.team/');
 	say $link;
-	say Dumper $ua->get_rss_data($link);
+	# say Dumper $ua->get_rss_data($link);
 }
 
 caller or main(@ARGV)
