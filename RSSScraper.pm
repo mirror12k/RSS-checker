@@ -11,7 +11,7 @@ use XML::XPath;
 use URI;
 use DateTime;
 
-use Data::Dumper;
+# use Data::Dumper;
 
 
 
@@ -58,6 +58,9 @@ sub get_rss_data {
 		$item_data{author} = '' . $item->findvalue('./author');
 		$item_data{pub_date} = '' . $item->findvalue('./pubDate');
 		$item_data{pub_date_parsed} = parse_datetime ($item_data{pub_date}) // die "failed to parse datetime from $rss_url: $item_data{pub_date}";
+		foreach my $category ($item->findnodes('./category')) {
+			push @{$data{categories}}, '' . $category->findvalue('.');
+		}
 
 		push @{$data{items}}, \%item_data;
 	}
