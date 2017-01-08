@@ -27,9 +27,10 @@ sub get_rss_link {
 	my $xp = HTML::TreeBuilder::XPath->new;
 	$xp->parse_content($self->content);
 
-	my $link = $xp->findvalue('//link[@type="application/rss+xml"]/@href');
-	return URI->new_abs($link, $self->uri) if $link ne '';
-	return
+	return map URI->new_abs($_, $self->uri), map $_->findvalue('./@href'), $xp->findnodes('//link[@type="application/rss+xml"]');
+	# my $link = $xp->findvalue('//link[@type="application/rss+xml"]/@href');
+	# return URI->new_abs($link, $self->uri) if $link ne '';
+	# return
 }
 
 sub get_rss_data {
@@ -44,7 +45,7 @@ sub get_rss_data {
 	$data{link} = '' . $xp->findvalue('/rss/channel/link');
 	$data{managing_editor} = '' . $xp->findvalue('/rss/channel/managingEditor');
 	$data{build_date} = '' . $xp->findvalue('/rss/channel/lastBuildDate');
-	$data{build_date_parsed} = parse_datetime($data{build_date}) // die "failed to parse datetime from $rss_url: $data{build_date}";
+	$data{build_date_parsed} = parse_datetime($data{build_date}) // die "failed to parse datetime from $rss_url: $data{build_date}" if $data{build_date} ne '';
 	foreach my $category ($xp->findnodes('/rss/channel/category')) {
 		push @{$data{categories}}, '' . $category->findvalue('.');
 	}
@@ -108,9 +109,11 @@ sub parse_datetime {
 
 
 sub main {
+	my ($url) = @_;
+	die "url required" unless $url;
 	my $ua =RSSScraper->new;
-	my $link = $ua->get_rss_link('http://www.redblue.team/');
-	say $link;
+	say foreach $ua->get_rss_link($url);
+	# say $link;
 	# say Dumper $ua->get_rss_data($link);
 }
 
